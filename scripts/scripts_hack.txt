@@ -168,7 +168,7 @@ create table orders(
   foreign key (id_product) references products (id_product)
 );
 
-## HACK 5 (1RA PARTE - INSERT)
+## HACK 6 (1RA PARTE - INSERT)
 create table countries(
   id_country serial primary key,
   name varchar(50) not null  
@@ -311,4 +311,158 @@ insert into invoices (id_customer, id_payment, id_invoice_status, date, total_to
          ('yoyo@yoyo.com', 3, 2, CURRENT_DATE, 406.00);
 select * from invoices;
 
+## HACK 6 (2DA PARTE - DELETE LAST CUSTOMER)
+create table countries(
+  id_country serial primary key,
+  name varchar(50) not null  
+);
+
+create table roles(
+  id_role serial primary key,
+  name varchar(50) not null  
+);
+
+create table taxes(
+  id_tax serial primary key,
+  percentage numeric(10,2) not null   
+);
+
+create table offers(
+  id_offer serial primary key,
+  _status varchar(50) not null
+);
+
+create table discounts(
+  id_discount serial primary key,
+  status varchar(50) not null,
+  percentage numeric(5,2) not null
+);
+
+create table payments(
+  id_payment serial primary key,
+  type varchar(50) not null  
+);
+
+create table customers(
+  email varchar(100) primary key,
+  id_country integer not null,
+  id_role integer not null,
+  name varchar(50) not null,
+  age integer not null,
+  password varchar (50) not null,
+  physical_address text not null,
+  foreign key (id_country) references countries (id_country),
+  foreign key (id_role) references roles (id_role)
+);
+
+create table invoice_status(
+  id_invoice_status serial primary key,
+  status varchar(50) not null  
+);
+
+create table products(
+  id_product serial primary key,
+  id_discount integer not null,
+  id_offer integer not null,
+  id_tax integer not null,
+  name varchar(100) not null,
+  details text not null,
+  minimum_stock integer not null,
+  maximum_stock integer not null,
+  current_stock integer not null,
+  price numeric(10,2) not null,
+  price_with_tax numeric(10,2) not null,
+  foreign key (id_discount) references discounts (id_discount),
+  foreign key (id_offer) references offers (id_offer),
+  foreign key (id_tax) references taxes (id_tax)
+);
+
+create table product_customers(
+  id_product integer,
+  id_customer varchar(50) not null,
+  primary key (id_product, id_customer),
+  foreign key (id_product) references products (id_product),
+  foreign key (id_customer) references customers (email)
+);
+
+create table invoices(
+  id_invoice serial primary key,
+  id_customer varchar(50) not null,
+  id_payment integer not null,
+  id_invoice_status integer not null,
+  date date not null,
+  total_to_pay numeric(10,2) not null,
+  foreign key (id_payment) references payments (id_payment),
+  foreign key (id_customer) references customers (email),
+  foreign key (id_invoice_status) references invoice_status (id_invoice_status)
+);
+
+create table orders(
+  id_order serial primary key,
+  id_invoice integer not null,
+  id_product integer not null,
+  detail text not null,
+  amount numeric(10,2) not null,
+  price numeric(10,2) not null,
+  foreign key (id_invoice) references invoices (id_invoice),
+  foreign key (id_product) references products (id_product)
+);
+
+-- inserting values in tables --
+insert into countries (name) values ('argentina'), ('colombia'), ('chile');
+select * from countries;
+
+insert into roles (name) values ('retailer'), ('wholesale'), ('non-guvernamental');
+select * from roles;
+
+insert into taxes (percentage) values (16.00), (1.00), (3.00);
+select * from taxes;
+
+insert into offers (_status) values ('enable'), ('disable'), ('hybrid');
+select * from offers;
+
+insert into discounts (status, percentage) values ('low', 10.00), ('medium', 15.00), ('sale', 30.00);
+select * from discounts;
+
+insert into payments (type) values ('cash'), ('credit card'), ('btc');
+select * from payments;
+
+insert into customers (email, id_country, id_role, name, age, password, physical_address) values 
+  ('foo@foziman.com', 1, 1, 'foozi', 28, 'foozi234', 'Vicente Lopez, Buenos Aires'),
+  ('bar@barziman.com', 2, 2, 'barzi', 35, 'barzit234', 'Salitre, Bogota'),
+  ('yoyo@yoyo.com', 3, 2, 'yoyo', 44, 'yoyoyo1234', 'Las Condes, Santiago');
+select * from customers;
+
+insert into invoice_status (status) values ('undue'), ('due'), ('overdue');
+select * from invoice_status;
+
+insert into products (id_discount, id_offer, id_tax, name, details, minimum_stock, maximum_stock, current_stock, price, price_with_tax) 
+  values (1, 1, 1, 'PS5', 'PlayStation 5 Brand New', 50, 500, 120, 500.00, 580.00),
+         (2, 3, 1, 'XBOX', 'XBOX Brand New', 50, 500, 120, 550.00, 638.00),
+         (3, 1, 1, 'N SWITCH', 'Nintendo Switch Bran New', 50, 500, 120, 350.00, 406.00);
+select * from products;
+
+insert into product_customers (id_product, id_customer) values 
+  (1, 'foo@foziman.com'),
+  (2, 'bar@barziman.com');
+  
+select * from product_customers;
+
+insert into invoices (id_customer, id_payment, id_invoice_status, date, total_to_pay) 
+  values ('foo@foziman.com', 1, 1, CURRENT_DATE, 580.00),
+         ('bar@barziman.com', 2, 2, CURRENT_DATE, 638.00);
+         
+select * from invoices;
+
+
+--delete from product_customers where id_customer = 'yoyo@yoyo.com';
+--select * from product_customers;
+
+--delete from invoices where id_customer = 'yoyo@yoyo.com';
+--select * from invoices;
+
+delete from customers where email = 'yoyo@yoyo.com';
+select * from customers;
+
+select * from product_customers;
 
